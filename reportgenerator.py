@@ -5,6 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+from premailer import transform
 
 #Connect to SQL Server:
 conenct = pyodbc.connect(
@@ -26,9 +27,22 @@ data = pd.read_sql(sql,connect)
 df = pd.DataFrame(data)
 df.to_excel("ouput.xlsx", index=False)
 
+
+#Format DataFrame(If want to have table on the body and not as attachment) : 
+
+pre_html = df.style.set_table_styles([{'selector':'th',
+                            'props':[('background' ,'#4F81BD')]},
+                            {'selector': 'tr:nth-of-type(odd)',
+                             'props': [('background', '#DCE6F1')]}]).hide_index().render()
+
+html  transform(pre_html, pretty_print =True) #inline CSS
+
+
+
 #Setup for email(gmail)
 
 gmail_user= "useremail@gmail.com"
+style.set_table_style
 gmail_p[assword= "userpassword"
 sent_from = gmail_user
 to= "receiver@gmail.com" #For multiple recipent, use list 
@@ -41,8 +55,16 @@ message["From"] = gmail_user
 message["To"] = to #If using list, must convert to str use ",".join(to) 
 message["Subject"] = subject
 
-#Setup body and attachemtns for the mail:
+
+
+
+#Setupt MIME for tables on the body(not attachment) :
 message.attach(MIMEText(body))
+part = MIMEText(html,'html')
+mesasge.attach(part)
+
+
+#Setup attachemtns for the mail:
 
 attach_file_name = "output.xlsx"
 attach_file = open(attach_file_name, "rb") #Open file as binary mode
